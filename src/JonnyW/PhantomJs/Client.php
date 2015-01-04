@@ -179,13 +179,14 @@ class Client implements ClientInterface
      * @access public
      * @return string
      */
+    
     public function getCommand()
     {
         $phantomJs     = $this->getPhantomJs();
         $phantomLoader = $this->getPhantomLoader();
 
         $this->validateExecutable($phantomJs);
-        $this->validateExecutable($phantomLoader);
+        // $this->validateExecutable($phantomLoader);
 
         $options = $this->getOptions();
 
@@ -257,7 +258,7 @@ class Client implements ClientInterface
      */
     public function setPhantomLoader($path)
     {
-        $this->validateExecutable($path);
+        // $this->validateExecutable($path);
 
         $this->phantomLoader = $path;
 

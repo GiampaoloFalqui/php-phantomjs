@@ -137,7 +137,13 @@ procedure.execute = function (status) {
     system.stderr.write(debug.join('\n') + '\n');
     console.log(JSON.stringify(response, undefined, 4));
     
-    phantom.exit();
+	procedure.exit(0);
 };
+
+procedure.exit = function(code) {
+	setTimeout(function() { phantom.exit(code) }, 0);	
+	phatom.onError = function() {};
+}
+
 
 {% endautoescape %}

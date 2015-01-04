@@ -92,24 +92,33 @@ class Procedure implements ProcedureInterface
 
             $executable = $this->write($procedure);
 
+            $resultFile = tempnam(sys_get_temp_dir(), "phantomjs");
+            $logsFile = tempnam(sys_get_temp_dir(), "phantomjs");
+
             $descriptorspec = array(
                 array('pipe', 'r'),
-                array('pipe', 'w'),
-                array('pipe', 'w')
+                array('file', $resultFile, 'a'),
+                array('file', $logsFile, 'a')
             );
 
             $process = proc_open(escapeshellcmd(sprintf('%s %s', $client->getCommand(), $executable)), $descriptorspec, $pipes, null, null);
-
+            
             if (!is_resource($process)) {
                 throw new ProcedureFailedException('proc_open() did not return a resource');
             }
 
-            $result = stream_get_contents($pipes[1]);
-            $log    = stream_get_contents($pipes[2]);
+            while (true) {
+                $status = proc_get_status($process);
+                if ($status['running'] === false) {
+                    break;
+                }
+                usleep(500000);
+            }
+
+            $result = file_get_contents($resultFile);
+            $log    = file_get_contents($logsFile);
 
             fclose($pipes[0]);
-            fclose($pipes[1]);
-            fclose($pipes[2]);
 
             proc_close($process);
 
@@ -121,12 +130,23 @@ class Procedure implements ProcedureInterface
 
             $this->remove($executable);
 
+            unlink($resultFile);
+            unlink($logsFile);
+
         } catch (NotWritableException $e) {
             throw $e;
         } catch (\Exception $e) {
 
             if (isset($executable)) {
                 $this->remove($executable);
+            }
+
+            if (isset($resultFile)) {
+                unlink($resultFile);
+            }
+
+            if (isset($logsFile)) {
+                unlink($logsFile);
             }
 
             throw new ProcedureFailedException(sprintf('Error when executing PhantomJs procedure "%s" - %s', $request->getType(), $e->getMessage()));
