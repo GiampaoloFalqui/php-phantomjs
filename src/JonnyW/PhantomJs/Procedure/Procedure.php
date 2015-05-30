@@ -102,7 +102,7 @@ class Procedure implements ProcedureInterface
             );
 
             $process = proc_open(escapeshellcmd(sprintf('%s %s', $client->getCommand(), $executable)), $descriptorspec, $pipes, null, null);
-            
+
             if (!is_resource($process)) {
                 throw new ProcedureFailedException('proc_open() did not return a resource');
             }
