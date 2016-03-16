@@ -142,7 +142,7 @@ procedure.execute = function (status) {
 
 procedure.exit = function(code) {
 	setTimeout(function() { phantom.exit(code) }, 0);
-	phatom.onError = function() {};
+	phantom.onError = function() {};
 }
 
 
